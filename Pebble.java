@@ -131,16 +131,24 @@ public class Pebble {
     }
 
     // Select random black bag
-    public static List<Integer> randomBag() {
-        Random rand = new Random();
-        int randomNumber = rand.nextInt(3);
-
+    public static List<Integer> randomBag(int randomNumber) {
         if (randomNumber == 0) {
             return blackBagX;
         } else if (randomNumber == 1) {
             return blackBagY;
         } else {
             return blackBagZ;
+        }
+    }
+
+    // determine the white bag
+    public static List<Integer> currentWhiteBag(int randNum) {
+        if (randNum == 0) {
+            return whiteBagA;
+        } else if (randNum == 1) {
+            return whiteBagB;
+        } else {
+            return whiteBagC;
         }
     }
 }

@@ -1,7 +1,7 @@
 package SoftDev;
 import java.util.*;
 
-public class PebbleGame {
+public class Test {
 
     static int numOfPlayer = 0;
     static List<Player> PlayerObjArr = new ArrayList<>();
@@ -10,15 +10,23 @@ public class PebbleGame {
 
         String playerName;
 
-        List<Integer> hand = new ArrayList<>();
-        List<Integer> bag = new ArrayList<>();
-        List<Integer> whiteBag = new ArrayList<>();
-
         public Player (String name) {
             playerName = name;
         }
 
         public void run() {
+
+            // select random bag
+            // draw 10 pebbles
+            // while (no winner):
+            // check if 100
+            // discard random
+            // draw random
+        }
+        public static List<Integer> playerHand() {
+            List<Integer> hand = new ArrayList<>();
+            List<Integer> bag = new ArrayList<>();
+            List<Integer> whiteBag = new ArrayList<>();
 
             // randomise a number
             Random rand = new Random();
@@ -32,63 +40,31 @@ public class PebbleGame {
             for (int i = 0; i < 10; i++) {
                 int currentPebble = rand.nextInt(bag.size());
 
-                hand.add(bag.get(currentPebble));
-                bag.remove(currentPebble);
+                hand.add(bag.get(currentPebble-1));
+                bag.remove(currentPebble-1);
             }
-
-            System.out.println("hand: " + hand);
 
             // check for winner
             double sum = 0;
             for(int i = 0; i < hand.size(); i++)
                 sum += hand.get(i);
 
+
+            /*
             // check, discard, draw, repeat
             while (sum != 100) {
-
-                int tempSum = 0;
-
-                Random rand1 = new Random();
                 // discard to white bag
-                int randPebble = rand1.nextInt(hand.size());
-                whiteBag.add(hand.get(randPebble));
-                hand.remove(randPebble);
 
-                // select a new random bag
-                Random rand2 = new Random();
-                int randomNumber2 = rand.nextInt(3);
-                bag = Pebble.randomBag(randomNumber2);
-                whiteBag = Pebble.currentWhiteBag(randomNumber2);
-                if (bag.isEmpty()) {
-                    // fill
-                    bag = whiteBag;
-
-                    // select new bag
-                    int randomNumber4 = rand.nextInt(3);
-                    bag = Pebble.randomBag(randomNumber4);
-                    whiteBag = Pebble.currentWhiteBag(randomNumber4);
-                }
-
-                // draw a random pebble from the new random bag
-                Random rand3 = new Random();
-                int randomIndex = rand3.nextInt(bag.size());
-                hand.add(bag.get(randomIndex));
-                bag.remove(randomIndex);
-
-                System.out.println("hand: " + hand);
-                System.out.println("black bag: " + bag);
-                System.out.println("white bag: " + whiteBag);
-
-                // new sum
-                for(int i = 0; i < hand.size(); i++)
-                    tempSum += hand.get(i);
-                sum = tempSum;
-                System.out.println("Sum = " + sum);
+                // draw from bag
             }
+             */
 
-            // Sum is 100 !!!
-            System.out.println("WE HAVE A WINNER");
+            System.out.println("hand: " + hand);
+            System.out.println(bag);
+            //System.out.println(whiteBag);
+            return hand;
         }
+
 
         public static int numOfPlayers() {
             Scanner myScanner = new Scanner(System.in);
