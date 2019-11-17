@@ -11,8 +11,13 @@ public class PebbleGame {
         String playerName;
 
         List<Integer> hand = new ArrayList<>();
+
+        // bag is BLACK BAG: either X, Y or Z
         List<Integer> bag = new ArrayList<>();
+
+        // whiteBag is WHITE BAG: either A, B or C
         List<Integer> whiteBag = new ArrayList<>();
+
 
         public Player (String name) {
             playerName = name;
@@ -56,21 +61,32 @@ public class PebbleGame {
 
                 // select a new random bag
                 Random rand2 = new Random();
-                int randomNumber2 = rand.nextInt(3);
+                int randomNumber2 = rand2.nextInt(3);
                 bag = Pebble.randomBag(randomNumber2);
                 whiteBag = Pebble.currentWhiteBag(randomNumber2);
-                if (bag.isEmpty()) {
+
+                if (bag.size() == 0) {
+
+                    System.out.println("IF STATEMENT");
                     // fill
-                    bag = whiteBag;
+                    bag.addAll(whiteBag);
+                    whiteBag.clear();
+
+                    System.out.println("Black bag: " + Arrays.toString(bag.toArray()));
+                    System.out.println("White bag: " + Arrays.toString(whiteBag.toArray()));
 
                     // select new bag
                     int randomNumber4 = rand.nextInt(3);
-                    bag = Pebble.randomBag(randomNumber4);
-                    whiteBag = Pebble.currentWhiteBag(randomNumber4);
+                    System.out.println("Bag size: " + bag.size());
+
+                    // SELECT NEW BAG BUT DIDNT WORK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    //bag = Pebble.randomBag(randomNumber4);
+                    //whiteBag = Pebble.currentWhiteBag(randomNumber4);
                 }
 
                 // draw a random pebble from the new random bag
                 Random rand3 = new Random();
+                System.out.println(bag.size());
                 int randomIndex = rand3.nextInt(bag.size());
                 hand.add(bag.get(randomIndex));
                 bag.remove(randomIndex);
@@ -143,10 +159,14 @@ public class PebbleGame {
         }
         */
 
+
+        // Start threading
         for (int i = 1; i < (numOfPlayer + 1); i++) {
             Thread player = new Thread(new Player("Player " + i));
             player.start();
         }
+
+
 
 
 
@@ -159,8 +179,5 @@ public class PebbleGame {
         }
          */
         //System.out.println(hash_map);
-
-        // start threading
-
     }
 }
