@@ -17,11 +17,14 @@ import java.util.*;
 public class PebbleGame {
 
     static int numOfPlayers = 0;
-    static List<Player> PlayerObjArr = new ArrayList<>();
 
-    public static class Player implements Runnable{
+    private enum WhiteBag { A, B, C; }
+    private enum BlackBag { X, Y, Z; }
 
-        int playerName; // Name (number) of player. E.g. Player 1 (playerName = 1), player 2 (playerName = 2) etc.
+    public static class Player implements Runnable {
+
+        String playerName; // Name (number) of player. E.g. Player 1 (playerName = 1), player 2 (playerName = 2) etc.
+        int bagNum; // Number representing the bag. E.g. bag 0 means Black Bag X and White Bag A, 1 is Y/B, 2 is Z/C
 
         List<Integer> hand;
         List<Integer> blackBag = new ArrayList<>();
@@ -29,23 +32,21 @@ public class PebbleGame {
         List<String> output;
 
         public Player(int num) {
-            playerName = num;
+            playerName = "Player " + Integer.toString(num);
             hand = new ArrayList<>();
             output = new ArrayList<>();
         }
-
-        List<Integer> tempBlackBag = new ArrayList<>();
-        List<Integer> tempWhiteBag = new ArrayList<>();
-
         public void run() {
 
-            // randomise a number
             Random rand = new Random();
-            int randomNumber = rand.nextInt(3);  // from 0-2 (3 bags)
+            bagNum = rand.nextInt(3);  // from 0-2 (3 bags)
 
             // selecting random bag
-            blackBag = Pebble.randomBlackBag(randomNumber);
-            whiteBag = Pebble.currentWhiteBag(randomNumber);
+            blackBag = Pebble.randomBlackBag(bagNum);
+            whiteBag = Pebble.currentWhiteBag(bagNum);
+
+            System.out.println("STARTING BLACKBAG: " + BlackBag.values()[bagNum]);
+            System.out.println("STARTING WHITEBAG: " + WhiteBag.values()[bagNum]);
 
             // selecting first 10 random pebbles
             for (int i = 0; i < 10; i++) {
@@ -55,78 +56,43 @@ public class PebbleGame {
                 blackBag.remove(currentPebble);
             }
 
-            System.out.println("STARTING hand of player " + playerName + " : " + hand);
+            //output.add(playerName + "draws");
 
-            // check for winner
-            double sum = 0;
+            // sum to check for winner
+            int sum = 0;
             for(int i = 0; i < hand.size(); i++)
                 sum += hand.get(i);
 
-            // check, discard, draw, repeat
+            // (1) DISCARD, (2) SELECT, (3) DRAW, REPEAT until sum = 100
             while (sum != 100) {
 
-                Random rand1 = new Random();
-                // discard to white bag
-                int randPebble = rand1.nextInt(hand.size());
+                // (1) DISCARD to white bag
+                int randPebble = rand.nextInt(hand.size());
                 whiteBag.add(hand.get(randPebble));
                 hand.remove(randPebble);
 
-                // select a new random bag
-                Random rand2 = new Random();
-                int randomNumber2 = rand2.nextInt(3);
-                blackBag = Pebble.randomBlackBag(randomNumber2);
-                whiteBag = Pebble.currentWhiteBag(randomNumber2);
+                // (2) SELECT a new random bag
+                while (true) {
+                    bagNum = rand.nextInt(3);
+                    blackBag = Pebble.randomBlackBag(bagNum);
+                    whiteBag = Pebble.currentWhiteBag(bagNum);
 
-                if (blackBag.size() == 0) {
+                    // fills bag if empty
+                    if (blackBag.size() == 0) {
+                        blackBag.addAll(whiteBag);
+                        whiteBag.clear();
 
-                    System.out.println("============ <> IF STATEMENT <> ============");
-                    // fill
-                    blackBag.addAll(whiteBag);
-                    whiteBag.clear();
-
-                    System.out.println("<> Black bag: " + Arrays.toString(blackBag.toArray()));
-                    System.out.println("<> White bag: " + Arrays.toString(whiteBag.toArray()));
-
-                    // select new bag
-                    while (tempBlackBag.isEmpty()){
-                        int randomNumber4 = rand.nextInt(3);
-                        tempBlackBag = Pebble.randomBlackBag(randomNumber4);
-                        tempWhiteBag = Pebble.randomBlackBag(randomNumber4);
-                    }
-                    System.out.println("<> NEW black bag: " + tempBlackBag);
-                    System.out.println("<> NEW size: " + tempBlackBag.size());
-
-                    // draw from new bag
-                    Random rand5 = new Random();
-                    int randomIndex = rand5.nextInt(tempBlackBag.size());
-                    hand.add(tempBlackBag.get(randomIndex));
-                    tempBlackBag.remove(randomIndex);
-
-                    System.out.println("============ <> CONTINUE <> ============");
-                    continue;
-
-                    /* OLD (BROKEN) VERSION
-                    int randomNumber4 = rand.nextInt(3);
-                    System.out.println("<> BEFORE blackBag size: " + blackBag.size());
-                    blackBag = Pebble.randomBlackBag(randomNumber4);
-                    System.out.println("<> AFTER blackBag size: " + blackBag.size());
-                    whiteBag = Pebble.currentWhiteBag(randomNumber4);
-                    System.out.println("<> whiteBag size: " + whiteBag.size());
-
-                    System.out.println("============ <> END OF IF STATEMENT <> ============");
-                    //continue;
-                    */
+                    } else { break; }
                 }
 
-                // draw a random pebble from the new random bag
-                Random rand3 = new Random();
-                int randomIndex = rand3.nextInt(blackBag.size());
-                hand.add(blackBag.get(randomIndex));
+                // (3) DRAW a random pebble from the new random bag
+                int randomIndex = rand.nextInt(blackBag.size());
+                hand.add(blackBag.get(rand.nextInt(blackBag.size())));
                 blackBag.remove(randomIndex);
 
-                System.out.println("hand of player " + playerName + ": " + hand);
-                System.out.println("black bag: " + blackBag);
-                System.out.println("white bag: " + whiteBag);
+                System.out.println("hand of " + playerName + ": " + hand);
+                System.out.println("black bag " + BlackBag.values()[bagNum] + ": " + blackBag);
+                System.out.println("white bag: " + WhiteBag.values()[bagNum] + ": " + whiteBag);
 
                 int newSum = 0;
                 for(int i = 0; i < hand.size(); i++)
@@ -134,9 +100,10 @@ public class PebbleGame {
                 sum = newSum;
                 System.out.println("Sum = " + sum);
             }
-
             // Sum is 100 !!!
-            System.out.println("WE HAVE A WINNER! Player " + playerName);
+            System.out.println("WE HAVE A WINNER! " + playerName);
+            // <><><><><><><><> Write output to file for each player here. Maybe use method with for loop.
+            System.exit(0);
         }
 
         public static int getNumOfPlayers() {
@@ -165,10 +132,10 @@ public class PebbleGame {
         // Sets the number of players in the game by asking for user input checking whether it is valid
         numOfPlayers = Player.getNumOfPlayers();
 
-        // Initiating black bags X, Y, Z
+        // Initiates black bags X, Y, Z
         Pebble.createBlackBags();
 
-        // Launching the game with the players acting as concurrent threads
+        // Launches the game with the players acting as concurrent threads
         for (int i = 1; i < (numOfPlayers + 1); i++) {
             Thread player = new Thread(new Player(i));
             player.start();
