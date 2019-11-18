@@ -1,51 +1,61 @@
 package SoftDev;
 import java.util.*;
 
+/**
+ * Main class for the pebble game.
+ * Players are implemented here as nested classes and act as concurrent threads.
+ *
+ * Created using Java version:     <><><><><><><><><><><><><> ADD JAVA VERSION   AND   SDK VERSION HERE <><><><><><><><><><><><><>
+ *
+ * ECM2414 - Software Development - CA 2019 - Pebble Game
+ *
+ * @author wv211
+ * @author mtj202
+ * @version 18 November 2019
+ **/
+
 public class PebbleGame {
 
-    static int numOfPlayer = 0;
+    static int numOfPlayers = 0;
     static List<Player> PlayerObjArr = new ArrayList<>();
 
     public static class Player implements Runnable{
 
-        String playerName;
+        int playerName; // Name (number) of player. E.g. Player 1 (playerName = 1), player 2 (playerName = 2) etc.
 
-        List<Integer> hand = new ArrayList<>();
-
-        // bag is BLACK BAG: either X, Y or Z
-        List<Integer> bag = new ArrayList<>();
-
-        // whiteBag is WHITE BAG: either A, B or C
+        List<Integer> hand;
+        List<Integer> blackBag = new ArrayList<>();
         List<Integer> whiteBag = new ArrayList<>();
+        List<String> output;
 
-        // Temp black and white bags for the IF LOOP
+        public Player(int num) {
+            playerName = num;
+            hand = new ArrayList<>();
+            output = new ArrayList<>();
+        }
+
         List<Integer> tempBlackBag = new ArrayList<>();
         List<Integer> tempWhiteBag = new ArrayList<>();
-
-
-        public Player (String name) {
-            playerName = name;
-        }
 
         public void run() {
 
             // randomise a number
             Random rand = new Random();
-            int randomNumber = rand.nextInt(3);
+            int randomNumber = rand.nextInt(3);  // from 0-2 (3 bags)
 
             // selecting random bag
-            bag = Pebble.randomBag(randomNumber);
+            blackBag = Pebble.randomBlackBag(randomNumber);
             whiteBag = Pebble.currentWhiteBag(randomNumber);
 
             // selecting first 10 random pebbles
             for (int i = 0; i < 10; i++) {
-                int currentPebble = rand.nextInt(bag.size());
+                int currentPebble = rand.nextInt(blackBag.size());
 
-                hand.add(bag.get(currentPebble));
-                bag.remove(currentPebble);
+                hand.add(blackBag.get(currentPebble));
+                blackBag.remove(currentPebble);
             }
 
-            System.out.println("starting hand: " + hand);
+            System.out.println("STARTING hand of player " + playerName + " : " + hand);
 
             // check for winner
             double sum = 0;
@@ -54,11 +64,6 @@ public class PebbleGame {
 
             // check, discard, draw, repeat
             while (sum != 100) {
-
-                System.out.println("LOOP BEGINS");
-                System.out.println("initial hand: " + hand);
-
-                int tempSum = 0;
 
                 Random rand1 = new Random();
                 // discard to white bag
@@ -69,27 +74,27 @@ public class PebbleGame {
                 // select a new random bag
                 Random rand2 = new Random();
                 int randomNumber2 = rand2.nextInt(3);
-                bag = Pebble.randomBag(randomNumber2);
+                blackBag = Pebble.randomBlackBag(randomNumber2);
                 whiteBag = Pebble.currentWhiteBag(randomNumber2);
 
-                if (bag.size() == 0) {
+                if (blackBag.size() == 0) {
 
-                    System.out.println("IF STATEMENT");
+                    System.out.println("============ <> IF STATEMENT <> ============");
                     // fill
-                    bag.addAll(whiteBag);
+                    blackBag.addAll(whiteBag);
                     whiteBag.clear();
 
-                    System.out.println("Black bag: " + Arrays.toString(bag.toArray()));
-                    System.out.println("White bag: " + Arrays.toString(whiteBag.toArray()));
+                    System.out.println("<> Black bag: " + Arrays.toString(blackBag.toArray()));
+                    System.out.println("<> White bag: " + Arrays.toString(whiteBag.toArray()));
 
                     // select new bag
                     while (tempBlackBag.isEmpty()){
                         int randomNumber4 = rand.nextInt(3);
-                        tempBlackBag = Pebble.randomBag(randomNumber4);
-                        tempWhiteBag = Pebble.randomBag(randomNumber4);
+                        tempBlackBag = Pebble.randomBlackBag(randomNumber4);
+                        tempWhiteBag = Pebble.randomBlackBag(randomNumber4);
                     }
-                    System.out.println("new black bag: " + tempBlackBag);
-                    System.out.println("new size: " + tempBlackBag.size());
+                    System.out.println("<> NEW black bag: " + tempBlackBag);
+                    System.out.println("<> NEW size: " + tempBlackBag.size());
 
                     // draw from new bag
                     Random rand5 = new Random();
@@ -97,106 +102,76 @@ public class PebbleGame {
                     hand.add(tempBlackBag.get(randomIndex));
                     tempBlackBag.remove(randomIndex);
 
-                    System.out.println("CONTINUE");
+                    System.out.println("============ <> CONTINUE <> ============");
                     continue;
+
+                    /* OLD (BROKEN) VERSION
+                    int randomNumber4 = rand.nextInt(3);
+                    System.out.println("<> BEFORE blackBag size: " + blackBag.size());
+                    blackBag = Pebble.randomBlackBag(randomNumber4);
+                    System.out.println("<> AFTER blackBag size: " + blackBag.size());
+                    whiteBag = Pebble.currentWhiteBag(randomNumber4);
+                    System.out.println("<> whiteBag size: " + whiteBag.size());
+
+                    System.out.println("============ <> END OF IF STATEMENT <> ============");
+                    //continue;
+                    */
                 }
 
                 // draw a random pebble from the new random bag
                 Random rand3 = new Random();
-                System.out.println(bag.size());
-                int randomIndex = rand3.nextInt(bag.size());
-                hand.add(bag.get(randomIndex));
-                bag.remove(randomIndex);
+                int randomIndex = rand3.nextInt(blackBag.size());
+                hand.add(blackBag.get(randomIndex));
+                blackBag.remove(randomIndex);
 
-                System.out.println("end hand: " + hand);
-                System.out.println("black bag: " + bag);
+                System.out.println("hand of player " + playerName + ": " + hand);
+                System.out.println("black bag: " + blackBag);
                 System.out.println("white bag: " + whiteBag);
 
-                // new sum
+                int newSum = 0;
                 for(int i = 0; i < hand.size(); i++)
-                    tempSum += hand.get(i);
-                sum = tempSum;
+                    newSum += hand.get(i);
+                sum = newSum;
                 System.out.println("Sum = " + sum);
             }
 
             // Sum is 100 !!!
-            System.out.println("WE HAVE A WINNER");
+            System.out.println("WE HAVE A WINNER! Player " + playerName);
         }
 
-        public static int numOfPlayers() {
-            Scanner myScanner = new Scanner(System.in);
-            System.out.println("Enter the number of players: ");
-            int num = myScanner.nextInt();
-            if (num > 0) {
-                System.out.println("number of players is " + num);
-                numOfPlayer = num;
-                return numOfPlayer;
-            } else {
-                System.out.println("Please enter a positive number of players!");
-                System.exit(0);
-                return numOfPlayer;
-            }
+        public static int getNumOfPlayers() {
+            do {
+                try {
+                    Scanner myScanner = new Scanner(System.in);
+                    System.out.println("Enter the number of players: ");
+                    int num = myScanner.nextInt();
+                    if (num > 0) {
+                        System.out.println("Number of players has been set to " + num);
+                        return num;
+                    } else {
+                        System.out.println("Error: Please enter a positive integer for the number of players!");
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Error: You must enter an integer to specify the number of players!");
+                }
+            } while (true);
         }
-
-        /*
-        public static List<Player> generatePlayers(int numPlayer) {
-            List<Player> PlayerObj = new LinkedList<Player>();
-            for(int i = 0; i < numPlayer; i++) {
-                PlayerObj.add(new Player());
-            }
-            System.out.println(PlayerObj);
-            PlayerObjArr = PlayerObj;
-            return PlayerObjArr;
-        }
-         */
-
     }
 
     public static void main(String[] args) {
 
-        // Ask user for the number of players
-        Player.numOfPlayers();
+        System.out.println("<> Welcome to the Pebble Game! <> \n<> Created by wv211 and mtj202 <>");
 
-        // Initialise black bags X, Y and Z
-        Pebble.getBlackBagX();
-        Pebble.getBlackBagY();
-        Pebble.getBlackBagZ();
+        // Sets the number of players in the game by asking for user input checking whether it is valid
+        numOfPlayers = Player.getNumOfPlayers();
 
-        //System.out.println(Arrays.toString(Pebble.blackBagX.toArray()));
-        //System.out.println(Arrays.toString(Pebble.blackBagY.toArray()));
-        //System.out.println(Arrays.toString(Pebble.blackBagZ.toArray()));
+        // Initiating black bags X, Y, Z
+        Pebble.createBlackBags();
 
-        // Start threading
-        for (int i = 1; i < (numOfPlayer + 1); i++) {
-            Thread player = new Thread(new Player("Player " + i));
+        // Launching the game with the players acting as concurrent threads
+        for (int i = 1; i < (numOfPlayers + 1); i++) {
+            Thread player = new Thread(new Player(i));
             player.start();
         }
-
-        // Generate Player objects
-        //Player.generatePlayers(numOfPlayer);
-
-        /*
-        // Generate player hand
-        for (int i = 1; i < (numOfPlayer + 1); i++) {
-            PlayerObjArr.get(i-1).playerHand();
-        }
-        */
-
-
-
-
-
-
-
-
-        /*
-        // Assign map to player objects
-        HashMap<String, List<Player>> hash_map = new HashMap<String, List<Player>>();
-        for (int i = 1; i < (numOfPlayer + 1); i++) {
-            hash_map.put("player ", (List<Player>) PlayerObjArr.get(i-1));
-            //System.out.println(PlayerObjArr.get(i-1));
-        }
-         */
-        //System.out.println(hash_map);
     }
 }

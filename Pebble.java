@@ -1,9 +1,10 @@
 package SoftDev;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.Random;
 
 public class Pebble {
 
@@ -17,121 +18,81 @@ public class Pebble {
     static List<Integer> whiteBagB = new ArrayList<Integer>();
     static List<Integer> whiteBagC = new ArrayList<Integer>();
 
-    // Read CSV file
-    public static String[] readCSV (String file) {
-        try {
-            File csvFile = new File (file);
-            Scanner csvScanner = new Scanner(csvFile);
-            String nextLine = csvScanner.nextLine();
-            String[] pebValues = nextLine.split(",");
+    // Reads the .txt or .csv file containing pebble values data and imports it
 
-            return pebValues;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    // Convert String array to Int array
-    public static int[] strToInt (String[] str) {
-        int size = str.length;
-        int[] intArr = new int [size];
-        for (int i = 0; i < size; i++)
-            intArr[i] = Integer.parseInt(str[i]);
-
-        return intArr;
-    }
-
-    // convert array to arrayList
-    public static List<Integer> arrToArrList (int[] arr) {
-        List<Integer> arrList = new ArrayList<Integer>(arr.length);
-        for (int i : arr) {
-            arrList.add(i);
-        }
-        return arrList;
-    }
-
-    // check if all integers in arrayList is positive
-    public static void checkArrayList(List<Integer> arrList) {
-        for (int i = 0; i < arrList.size(); i++)
-            if (arrList.get(i) < 0) {
-                System.out.println("Please make sure that all integer values are positive");
-                System.exit(0);
-            } else {
-                continue;
+    public static List<Integer> importPebValuesData(String file) {
+        do {
+            class NotEnoughPebblesException extends Exception {
+                private NotEnoughPebblesException(){}
             }
+            String errorMessage = "Please re-enter the location of the bag: ";
+            try {
+                File csvFile = new File(file);
+
+                if( file.length() > 4 && !file.substring(file.length() - 4).equals(".txt") &&
+                        !file.substring(file.length() - 4).equals(".csv")) {
+                    throw new FileNotFoundException();
+                }
+                Scanner csvScanner = new Scanner(csvFile);
+                String nextLine = csvScanner.nextLine();
+                String[] text = nextLine.split(",");
+
+                List<Integer> pebValues = new ArrayList<Integer>();
+
+                for (String input : text){
+                    int value = Integer.parseInt(input);
+                    if (value > 0) {
+                        pebValues.add(value);
+                    } else {
+                        throw new NumberFormatException();
+                    }
+                }
+                if (pebValues.size() < (PebbleGame.numOfPlayers * 11)) {
+                    throw new NotEnoughPebblesException();
+                }
+                System.out.println(pebValues);
+                return pebValues;
+
+            } catch (FileNotFoundException e) {
+                System.out.println("Error: Cannot locate the *.txt or *.csv file.");
+                Scanner myScanner = new Scanner(System.in);
+                System.out.println(errorMessage);
+                file = myScanner.nextLine();
+
+            } catch (NumberFormatException | NoSuchElementException e) {
+                System.out.println("Error: The file input must only contain positive integers separated by commas!");
+                Scanner myScanner = new Scanner(System.in);
+                System.out.println(errorMessage);
+                file = myScanner.nextLine();
+
+            } catch (NotEnoughPebblesException e) {
+                System.out.println("Error: Bag must contain at least 11 times as many pebbles as players!");
+                Scanner myScanner = new Scanner(System.in);
+                System.out.println(errorMessage);
+                file = myScanner.nextLine();
+            }
+        } while (true);
     }
 
-    // Generate BlackBagX
-    public static List<Integer> getBlackBagX() {
+    // Generate the 3 black bags X, Y, Z
+    public static void createBlackBags() {
         Scanner myScanner = new Scanner(System.in);
+
         System.out.println("Enter the location of bag X: ");
+        String file1 = myScanner.nextLine();
+        blackBagX = importPebValuesData(file1);
 
-        String bagX = myScanner.nextLine();
-        String[] pebbleValues = readCSV(bagX);
-        int[] intArr = strToInt(pebbleValues);
-
-        // convert array to arrayList
-        List<Integer> tempBlackBagX = arrToArrList(intArr);
-        // check if all values are positive
-        checkArrayList(tempBlackBagX);
-        // check size
-        checkSize(tempBlackBagX);
-        // return
-        blackBagX = tempBlackBagX;
-        return blackBagX;
-    }
-
-    // Generate BlackBagY
-    public static List<Integer> getBlackBagY() {
-        Scanner myScanner = new Scanner(System.in);
         System.out.println("Enter the location of bag Y: ");
+        String file2 = myScanner.nextLine();
+        blackBagY = importPebValuesData(file2);
 
-        String bagY = myScanner.nextLine();
-        String[] pebbleValues = readCSV(bagY);
-        int[] intArr = strToInt(pebbleValues);
-
-        // convert array to arrayList
-        List<Integer> tempBlackBagY = arrToArrList(intArr);
-        // check if all values are positive
-        checkArrayList(tempBlackBagY);
-        // check size
-        checkSize(tempBlackBagY);
-        // return
-        blackBagY = tempBlackBagY;
-        return blackBagY;
-    }
-
-    // Generate BlackBagZ
-    public static List<Integer> getBlackBagZ() {
-        Scanner myScanner = new Scanner(System.in);
         System.out.println("Enter the location of bag Z: ");
-
-        String bagZ = myScanner.nextLine();
-        String[] pebbleValues = readCSV(bagZ);
-        int[] intArr = strToInt(pebbleValues);
-
-        // convert array to arrayList
-        List<Integer> tempBlackBagZ = arrToArrList(intArr);
-        // check if all values are positive
-        checkArrayList(tempBlackBagZ);
-        // check size
-        checkSize(tempBlackBagZ);
-        // return
-        blackBagZ = tempBlackBagZ;
-        return blackBagZ;
+        String file3 = myScanner.nextLine();
+        blackBagZ = importPebValuesData(file3);
     }
 
-    // Check size of bag
-    public static void checkSize (List<Integer> bag) {
-
-        if (bag.size() < (PebbleGame.numOfPlayer * 11)) {
-            System.out.println("Bag must contain at least 11 times as many pebbles as players!");
-            System.exit(0);
-        }
-    }
-
-    // Select random black bag
-    public static List<Integer> randomBag(int randomNumber) {
+    // Selects a random black bag
+    public static List<Integer> randomBlackBag(int randomNumber) {
         if (randomNumber == 0) {
             return blackBagX;
         } else if (randomNumber == 1) {
@@ -141,7 +102,8 @@ public class Pebble {
         }
     }
 
-    // determine the white bag
+    // Determines which white bag to use based on the whiteBag(A,B,C)-blackBag(X,Y,Z) pairing:
+    // 0 = A <> X,    1 = B <> Y,    2 = C <> Z
     public static List<Integer> currentWhiteBag(int randNum) {
         if (randNum == 0) {
             return whiteBagA;
