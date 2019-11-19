@@ -36,8 +36,9 @@ public class PebbleGame {
             hand = new ArrayList<>();
             output = new ArrayList<>();
         }
-        public void run() {
 
+        public void startHand() throws InterruptedException {
+            Thread.sleep((long)(Math.random() * 50));
             Random rand = new Random();
             bagNum = rand.nextInt(3);  // from 0-2 (3 bags)
 
@@ -50,7 +51,9 @@ public class PebbleGame {
 
             // selecting first 10 random pebbles
             for (int i = 0; i < 10; i++) {
-                int currentPebble = rand.nextInt(blackBag.size());
+                Thread.sleep((long)(Math.random() * 50));
+                int currentPebbleIndex = rand.nextInt(blackBag.size());
+                int currentPebble = blackBag.get(currentPebbleIndex);
 
                 hand.add(blackBag.get(currentPebble));
                 blackBag.remove(currentPebble);
@@ -71,6 +74,8 @@ public class PebbleGame {
                 whiteBag.add(hand.get(randPebble));
                 hand.remove(randPebble);
 
+                Thread.sleep((long)(Math.random() * 50));
+
                 // (2) SELECT a new random bag
                 while (true) {
                     bagNum = rand.nextInt(3);
@@ -90,6 +95,8 @@ public class PebbleGame {
                 hand.add(blackBag.get(rand.nextInt(blackBag.size())));
                 blackBag.remove(randomIndex);
 
+                Thread.sleep((long)(Math.random() * 100));
+
                 System.out.println("hand of " + playerName + ": " + hand);
                 System.out.println("black bag " + BlackBag.values()[bagNum] + ": " + blackBag);
                 System.out.println("white bag: " + WhiteBag.values()[bagNum] + ": " + whiteBag);
@@ -104,6 +111,14 @@ public class PebbleGame {
             System.out.println("WE HAVE A WINNER! " + playerName);
             // <><><><><><><><> Write output to file for each player here. Maybe use method with for loop.
             System.exit(0);
+        }
+        public void run() {
+            synchronized (this) {
+                try {
+                    startHand();
+                } catch (InterruptedException e) {}
+
+            }
         }
 
         public static int getNumOfPlayers() {
