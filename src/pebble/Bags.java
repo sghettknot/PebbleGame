@@ -2,7 +2,18 @@ package pebble;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+/**
+ * Details for each bag are stored here, including the methods to read files and create bags from the file.
+ *
+ * @author wv211
+ * @author mtj202
+ * @version 18 November 2019
+ **/
 
 public class Bags {
 
@@ -16,11 +27,8 @@ public class Bags {
     static List<Integer> whiteBagB = new ArrayList<Integer>();
     static List<Integer> whiteBagC = new ArrayList<Integer>();
 
-    //static List<Integer> tempBag = new ArrayList<Integer>();
-
     // Reads the .txt or .csv file containing pebble values data and imports it
     public static List<Integer> importPebValuesData(String file) {
-        List<Integer> tempBag = new ArrayList<Integer>();
         do {
             class NotEnoughPebblesException extends Exception {
                 private NotEnoughPebblesException(){}
@@ -30,28 +38,29 @@ public class Bags {
 
                 FileReader csvFile = new FileReader(new File(file));
 
-                // check if file type is .csv
-                checkFileType(file);
-
+                if( file.length() > 4 && !file.substring(file.length() - 4).equals(".txt") &&
+                        !file.substring(file.length() - 4).equals(".csv")) {
+                    throw new FileNotFoundException();
+                }
                 Scanner csvScanner = new Scanner(csvFile);
                 String nextLine = csvScanner.nextLine();
                 String[] text = nextLine.split(",");
 
-                //List<Integer> pebValues = new ArrayList<Integer>();
+                List<Integer> pebValues = new ArrayList<Integer>();
 
-                // check if all pebbles are positive
-                for (String input : text) {
-                    negativePebblesCheck(tempBag,input);
+                for (String input : text){
+                    int value = Integer.parseInt(input);
+                    if (value > 0) {
+                        pebValues.add(value);
+                    } else {
+                        throw new NumberFormatException();
+                    }
                 }
-
-                // check pebble/player ratio condition
-                if (tempBag.size() < (PebbleGame.numOfPlayers * 11)) {
+                if (pebValues.size() < (PebbleGame.numOfPlayers * 11)) {
                     throw new NotEnoughPebblesException();
                 }
-
-                // return the bag if everything is valid
-                System.out.println(tempBag);
-                return tempBag;
+                System.out.println(pebValues);
+                return pebValues;
 
             } catch (FileNotFoundException e) {
                 System.out.println("Error: Cannot locate the *.txt or *.csv file.");
@@ -74,23 +83,6 @@ public class Bags {
         } while (true);
     }
 
-    public static void checkFileType(String file) throws FileNotFoundException {
-        if( file.length() > 4 && file.substring(file.length() - 4).equals(".txt") &&
-                !file.substring(file.length() - 4).equals(".csv")) {
-            throw new FileNotFoundException();
-        }
-    }
-    public static List<Integer> negativePebblesCheck(List<Integer> bag,String input) {
-        //List<Integer> pebValues = new ArrayList<Integer>();
-        int value = Integer.parseInt(input);
-        if (value > 0) {
-            bag.add(value);
-        } else {
-            throw new NumberFormatException();
-        }
-        return bag;
-    }
-
     // Generates the 3 black bags X, Y, Z
     public static void createBlackBags() {
         Scanner myScanner = new Scanner(System.in);
@@ -106,7 +98,6 @@ public class Bags {
         System.out.println("Enter the location of bag Z: ");
         String file3 = myScanner.nextLine();
         blackBagZ = importPebValuesData(file3);
-
     }
 
     // Selects a random black bag
@@ -130,13 +121,6 @@ public class Bags {
         } else {
             return whiteBagC;
         }
-    }
-
-    // TEST function. Note, this bypasses any requirements and checks
-    public static void force_createBlackBags(String file1, String file2, String file3) {
-        blackBagX = importPebValuesData(file1);
-        blackBagY = importPebValuesData(file2);
-        blackBagZ = importPebValuesData(file3);
     }
 }
 
