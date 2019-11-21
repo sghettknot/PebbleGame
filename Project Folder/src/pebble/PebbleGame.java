@@ -33,7 +33,7 @@ public class PebbleGame {
     private static int sleepMultiplierValue = 1;
     private static boolean winnerStatus = false;
     private static String[] output;
-    private static AtomicInteger playersReady = new AtomicInteger();
+    private static AtomicInteger playersReady;
     private static volatile boolean playersToldToStart = false;
 
     private enum WhiteBag { A, B, C; }
@@ -44,6 +44,7 @@ public class PebbleGame {
         String playerName; // Name (number) of player. E.g. Player 1 (playerName = 1), player 2 (playerName = 2) etc.
         int playerIndex;
         private int sumHand;
+        private static int playerBagNum;
 
         // Variables for some extra features
         int playerTurn = 1; // Counter which records the number of draws a player makes
@@ -54,14 +55,12 @@ public class PebbleGame {
         List<Integer> blackBag = (new ArrayList<>());
         List<Integer> whiteBag = (new ArrayList<>());
 
-        private static int playerBagNum;
-
         public Player(int num) {
             playerName = "Player " + num;
             playerIndex = num - 1;
         }
 
-        public synchronized void startHand() throws InterruptedException {
+        public synchronized void startHand() {
 
             int bagNum = ThreadLocalRandom.current().nextInt(0, 3);
 
@@ -102,7 +101,7 @@ public class PebbleGame {
             System.out.println(playerName + " has drawn 10 pebbles at random from black bag " + BlackBag.values()[bagNum]);
             System.out.println(playerName + " starting hand is " + hand);
 
-            checkHand();
+            //checkHand();
         }
 
         public void discard() throws InterruptedException {
@@ -166,7 +165,7 @@ public class PebbleGame {
 
                 System.out.println(playerName + " hand is " + hand + " (weight: " + sumHand + ")");
 
-                Thread.sleep((long)(Math.random() * 200 * sleepMultiplierValue));
+                Thread.sleep((long)(Math.random() * 50 * sleepMultiplierValue));
 
                 checkHand();
             }
@@ -199,9 +198,8 @@ public class PebbleGame {
         public void run() {
             try {
                 startHand();
-                /*
-                START OF PROBLEM
-                 */
+                playersReady.getAndIncrement();
+                
                 //  Check and wait for players to fill their hand
                 if (playersReady.get() != numOfPlayers) {
                     synchronized (playersReady) {
@@ -209,6 +207,7 @@ public class PebbleGame {
                             playersReady.wait();
 
                         } catch (InterruptedException e) {
+                            System.out.println("BLOB");
                             gameInterrupted();
                         }
                     }
@@ -219,10 +218,8 @@ public class PebbleGame {
                     }
                     playersToldToStart = true;
                 }
-                /*
-                END OF PROBLEM
-                 */
 
+                checkHand();
                 while (!winnerStatus && !Thread.currentThread().isInterrupted()) {
                     playerTurn += 1;
                     discard();
@@ -290,6 +287,7 @@ public class PebbleGame {
 
         // Sets the number of players in the game by asking for user input checking whether it is valid
         numOfPlayers = getNumOfPlayers();
+        playersReady = new AtomicInteger(numOfPlayers);
 
         // Initiates black bags X, Y, Z
         //Bags.createBlackBags();
@@ -324,6 +322,8 @@ public class PebbleGame {
             es.shutdownNow();
             System.out.println("Game ran for over 1 minute and it may be impossible to simulate it." +
                     "\nGame has been interrupted.");
+            saveOutputs();
+            System.exit(0);
         }
 
         System.out.println("Player " + winner + " has won after making " + draws + " draws!");
