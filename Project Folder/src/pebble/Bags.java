@@ -115,7 +115,7 @@ public class Bags {
         }
     }
 
-    // TEST function. Note, this bypasses any requirements and checks
+    // TEST function. Creates black bags from given files
     public static void force_createBlackBags(String file1, String file2, String file3) {
         blackBagX = importPebValuesData(file1);
         blackBagY = importPebValuesData(file2);
