@@ -20,7 +20,6 @@ public class Bags {
 
     // Reads the .txt or .csv file containing pebble values data and imports it
     public static List<Integer> importPebValuesData(String file) {
-        //tempBag.clear();
         List<Integer> tempBag = new ArrayList<Integer>();
         do {
             class NotEnoughPebblesException extends Exception {
